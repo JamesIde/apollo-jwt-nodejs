@@ -7,7 +7,7 @@ const typeDefs = gql`
     email: String!
     password: String!
     password2: String!
-    token: String
+    token: String!
   }
 
   type Query {
@@ -21,7 +21,15 @@ const typeDefs = gql`
       email: String!
       password: String!
       password2: String!
-    ): User
+    ): UpdateResponse
+  }
+  type Mutation {
+    loginUser(email: String!, password: String!): UpdateResponse
+  }
+  type UpdateResponse {
+    success: Boolean!
+    message: String!
+    token: String!
   }
 `
 // maybe change this from User object to a UpdateResponse type with bool and status
