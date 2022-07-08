@@ -3,11 +3,6 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const resolvers = {
   Query: {
-    async getUsers(parent, args, context, info) {
-      return await User.find({})
-    },
-  },
-  Query: {
     async getUser(parent, args, context, info) {
       //context.user.id
       const user = User.findById(context.user.id)
@@ -18,8 +13,28 @@ const resolvers = {
         return user
       }
     },
+    async getUsers(parent, args, context, info) {
+      return await User.find({})
+    },
   },
+
   Mutation: {
+    async loginUser(parent, args, context, info) {
+      console.log(context)
+      const user = await User.findOne({ email: args.email })
+      if (!user) {
+        throw new Error("User does not exist")
+      }
+      const isMatch = await bcrypt.compare(args.password, user.password)
+      if (!isMatch) {
+        throw new Error("Password is incorrect")
+      }
+      return {
+        success: true,
+        message: "User logged in successfully",
+        token: generateToken(user._id),
+      }
+    },
     async registerUser(parent, args, context, info) {
       console.log(context)
       // Check user already exists
@@ -49,24 +64,6 @@ const resolvers = {
           message: "User created successfully",
           token: generateToken(createUser._id),
         }
-      }
-    },
-  },
-  Mutation: {
-    async loginUser(parent, args, context, info) {
-      console.log(context)
-      const user = await User.findOne({ email: args.email })
-      if (!user) {
-        throw new Error("User does not exist")
-      }
-      const isMatch = await bcrypt.compare(args.password, user.password)
-      if (!isMatch) {
-        throw new Error("Password is incorrect")
-      }
-      return {
-        success: true,
-        message: "User logged in successfully",
-        token: generateToken(user._id),
       }
     },
   },

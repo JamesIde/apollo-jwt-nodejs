@@ -14,10 +14,10 @@ const typeDefs = gql`
 
   type Mutation {
     registerUser(
-      name: String!
-      email: String!
-      password: String!
-      password2: String!
+      name: String
+      email: String
+      password: String
+      password2: String
     ): UpdateResponse
   }
 
