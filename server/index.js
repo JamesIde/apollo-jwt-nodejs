@@ -1,4 +1,4 @@
-const dotenv = require("dotenv").config()
+require("dotenv").config()
 const { ApolloServer, gql } = require("apollo-server")
 const typeDefs = require("./utils/schema")
 const resolvers = require("./utils/resolvers")
@@ -13,17 +13,25 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: async ({ req }) => {
-    const token = req.headers.authorization.split(" ")[1] || ""
-
+    // get the token from the headers
+    const token = req.headers.authorization || ""
     if (!token) {
-      throw new Error("You must be logged in to do that!")
+      throw new Error("No token provided")
     }
 
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
-    req.user = await User.findById(decodedToken.id).select("-password")
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
-    return {
-      user: req.user,
+    if (!decoded) {
+      throw new Error("Invalid token")
+    } else {
+      const user = await User.findById(decoded.id)
+      if (user) {
+        return {
+          user,
+        }
+      } else {
+        throw new Error("User not found!")
+      }
     }
   },
 })

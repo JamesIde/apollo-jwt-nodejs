@@ -3,12 +3,25 @@ const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const resolvers = {
   Query: {
-    async getUsers(args, context, info) {
+    async getUsers(parent, args, context, info) {
       return await User.find({})
     },
   },
+  Query: {
+    async getUser(parent, args, context, info) {
+      //context.user.id
+      const user = User.findById(context.user.id)
+
+      if (!user) {
+        throw new Error("User not found")
+      } else {
+        return user
+      }
+    },
+  },
   Mutation: {
-    registerUser: async (parent, args, context, info) => {
+    async registerUser(parent, args, context, info) {
+      console.log(context)
       // Check user already exists
       const user = await User.findOne({ email: args.email })
       if (user) {
@@ -41,6 +54,7 @@ const resolvers = {
   },
   Mutation: {
     async loginUser(parent, args, context, info) {
+      console.log(context)
       const user = await User.findOne({ email: args.email })
       if (!user) {
         throw new Error("User does not exist")
