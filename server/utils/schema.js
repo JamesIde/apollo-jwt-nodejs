@@ -7,9 +7,20 @@ const typeDefs = gql`
     email: String
   }
 
+  type Project {
+    name: String
+    description: String
+    User: User
+  }
+
   type Query {
     getUsers: [User]
     getUser: User
+    getProjects: [Project]
+  }
+
+  type Mutation {
+    createProject(name: String, description: String): Project
   }
 
   type Mutation {
@@ -18,12 +29,13 @@ const typeDefs = gql`
       email: String
       password: String
       password2: String
-    ): UpdateResponse
+    ): User
   }
 
   type Mutation {
     loginUser(email: String!, password: String!): UpdateResponse
   }
+
   type UpdateResponse {
     success: Boolean!
     message: String!

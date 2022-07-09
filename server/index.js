@@ -15,11 +15,7 @@ const server = new ApolloServer({
   context: async ({ req }) => {
     // get the token from the headers
     const token = req.headers.authorization || ""
-    if (!token) {
-      return {
-        user: null,
-      }
-    }
+    if (!token) return null
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
@@ -32,9 +28,7 @@ const server = new ApolloServer({
           user,
         }
       } else {
-        return {
-          user: null,
-        }
+        return null
       }
     }
   },

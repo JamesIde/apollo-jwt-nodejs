@@ -1,4 +1,5 @@
 const User = require("../models/user")
+const Project = require("../models/project")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const resolvers = {
@@ -14,13 +15,16 @@ const resolvers = {
       }
     },
     async getUsers(parent, args, context, info) {
-      return await User.find({})
+      const users = await User.find({})
+      return users
+    },
+    async getProjects(parent, args, context, info) {
+      return await Project.findById(context.user.id)
     },
   },
 
   Mutation: {
     async loginUser(parent, args, context, info) {
-      console.log(context)
       const user = await User.findOne({ email: args.email })
       if (!user) {
         throw new Error("User does not exist")
@@ -36,7 +40,6 @@ const resolvers = {
       }
     },
     async registerUser(parent, args, context, info) {
-      console.log(context)
       // Check user already exists
       const user = await User.findOne({ email: args.email })
       if (user) {
@@ -60,10 +63,30 @@ const resolvers = {
 
       if (result) {
         return {
-          success: true,
-          message: "User created successfully",
-          token: generateToken(createUser._id),
+          name: createUser.name,
+          email: createUser.email,
+          _id: createUser._id,
         }
+      }
+    },
+    async createProject(parent, args, context, info) {
+      if (!context.user) {
+        throw new Error("You must be logged in to create a project")
+      }
+      if (!args.name || !args.description) {
+        throw new Error("You must provide a name and description")
+      }
+
+      const project = await Project.create({
+        name: args.name,
+        description: args.description,
+        User: context.user,
+      })
+
+      const result = await project.save()
+
+      if (result) {
+        return project
       }
     },
   },
